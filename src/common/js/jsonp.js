@@ -6,7 +6,6 @@ export default function jsonp(url, data, option) {
         originJSONP(url, option, (err, data) => {
             if (!err) {
                 resolve(data)
-                console.log(data,"datamm")
             } else {
                 reject(err)
             }
