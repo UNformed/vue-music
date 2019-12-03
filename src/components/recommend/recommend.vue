@@ -1,12 +1,12 @@
 <template>
   <div class="recommend">
-    <scroll class="recommend-content" :data="discList">
+    <scroll ref="scroll" class="recommend-content" :data="discList">
       <div>
         <div v-if="recommends.length" class="slider-wrapper">
           <slider>
             <div v-for="(item, index) in recommends" :key="index">
               <a :href="item.linkUrl">
-                <img :src="item.picUrl" alt />
+                <img @load="loadImage" :src="item.picUrl" alt />
               </a>
             </div>
           </slider>
@@ -16,7 +16,7 @@
           <ul>
             <li v-for="(item,index) in discList" :key="index" class="item">
               <div class="icon">
-                <img :src="item.imgurl" width="60" height="60" />
+                <img v-lazy="item.imgurl" width="60" height="60" />
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -26,6 +26,9 @@
           </ul>
         </div>
       </div>
+      <div class="loading" v-show="!discList.length">
+        <loading></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -33,7 +36,8 @@
 import { getRecommend, getDiscList } from "api/recommend";
 import { ERR_OK } from "api/config";
 import Slider from "base/slider/slider";
-import Scroll from "base/scroll/scroll"
+import Scroll from "base/scroll/scroll";
+import Loading from "base/loading/loading";
 export default {
   data() {
     return {
@@ -47,7 +51,8 @@ export default {
   },
   components: {
     Slider,
-    Scroll
+    Scroll,
+    Loading
   },
   methods: {
     _getRecommend() {
@@ -63,6 +68,12 @@ export default {
           this.discList = res.data.list;
         }
       });
+    },
+    loadImage() {
+      if (!this.checkLoaded) {
+        this.$refs.scroll._refresh();
+        this.checkLoaded = true;
+      }
     }
   }
 };
@@ -126,6 +137,13 @@ export default {
           }
         }
       }
+    }
+
+    .loading {
+      width: 100%;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 }
